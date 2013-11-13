@@ -1,0 +1,17 @@
+title: $:/editions/tw5.com/TiddlerInfo/StaticLink
+tags: $:/tags/TiddlerInfo
+caption: Static Link
+
+\define makeLink()
+http://five.tiddlywiki.com/static/<$view tiddler=<<currentTiddler>> field="title" format="doubleurlencoded"/>.html
+\end
+\define outerMakeLink()
+<$macrocall $name="makeLink" $output="text/plain"/>
+\end
+A static HTML representation of this tiddler is available at the URL:
+
+<<outerMakeLink>>
+
+<input value=<<outerMakeLink>> size="80"/>
+
+//Note that editing the URL here won't have any effect; it is presented in a text box just to make it easier to copy and paste//
