@@ -1,0 +1,24 @@
+created: 201311191256007
+creator: JeremyRuston
+modified: 201311191256007
+modifier: JeremyRuston
+title: Release 5.0.0-alpha.16
+tags: releasenote
+
+//[[See GitHub for detailed change history of this release|https://github.com/Jermolene/TiddlyWiki5/compare/v5.0.0-alpha.15...v5.0.0-alpha.16]]//
+
+!! New Features
+
+* Added a new plugin for displaying corner ribbons; currently used for a version banner on tw5.com
+
+!! Improvements
+
+* The page building blocks are now driven by the system tag `$:/tags/PageTemplate`
+** [[$:/TopSideBar]] and [[$:/LeftSideBar]] are no longer specially treated; use the new tag instead
+* Refactored control panel to add ''Saving'' tab that includes TiddlySpot options
+
+!! Bug fixes
+
+* Fixed problem with displaying tiddler titles that contain WikiText syntax
+
+Contributors to this release include @jermolene.
