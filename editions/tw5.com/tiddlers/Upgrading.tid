@@ -1,0 +1,34 @@
+created: 20131202102427114
+modified: 20131219100250559
+tags: howto
+title: Upgrading
+type: text/vnd.tiddlywiki
+
+There are several methods for upgrading an existing TiddlyWiki document to a new release. There is a [[different procedure|Upgrading TiddlyWiki on Node.js]] for upgrading [[TiddlyWiki on Node.js]].
+
+! Online upgrading
+
+Note that none of your personal data leaves your browser with this process.
+
+# Visit http://tiddlywiki.com/empty.html
+# Drag your old TiddlyWiki HTML file into the browser window
+#* Your tiddlers should be imported
+# Save changes to save the new version.
+
+This will download a file called ''empty.html'' to your computer. This file is the upgrade of your old file. You may need to open the location where ''empty.html'' was downloaded, rename ''empty.html'' with the name of the old file you are upgrading, and replace the old file by moving the new file in its place.
+
+//For the moment you'll also need to manually update any plugins that are not included in empty.html://
+
+># Open the control panel to the ''Plugins'' tab in your upgraded wiki
+># Check the version numbers of the plugins you are using; any plugins with an older version than the version of [[$:/core]] will probably need updating
+># Locate a wiki with the plugins you need to update and open the control panel ''Plugins'' tab
+>#* http://tiddlywiki.com/d3demo.html for the D3 plugin
+>#* http://tiddlywiki.com/codemirrordemo.html for the CodeMirror plugin
+>#* http://tiddlywiki.com/markdowndemo.html for the MarkDown plugin
+>#* http://tiddlywiki.com/ for most of the others
+># Drag the plugin links one by one back to your own wiki. You should see the version numbers update in the control panel
+># Save your wiki
+
+! Offline upgrading
+
+You can also download http://tiddlywiki.com/empty.html locally and perform the same drag-and-drop procedure to upgrade your files.

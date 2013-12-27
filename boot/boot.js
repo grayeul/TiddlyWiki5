@@ -269,7 +269,7 @@ $tw.utils.stringifyList = function(value) {
 // Parse a string array from a bracketted list. For example "OneTiddler [[Another Tiddler]] LastOne"
 $tw.utils.parseStringArray = function(value) {
 	if(typeof value === "string") {
-		var memberRegExp = /(?:\[\[([^\]]+)\]\])|([^\s]+)/mg,
+		var memberRegExp = /(?:^|\s)(?:\[\[(.*?)\]\])(?=\s|$)|(\S+)/mg,
 			results = [],
 			match;
 		do {
@@ -344,14 +344,35 @@ $tw.utils.resolvePath = function(sourcepath,rootpath) {
 };
 
 /*
-Returns true if the `actual` version is greater than or equal to the `required` version. Both are in `x.y.z` format.
+Parse a semantic version string into its constituent parts
 */
-$tw.utils.checkVersions = function(required,actual) {
-	var targetVersion = required.split("."),
-		currVersion = actual.split("."),
-		diff = [parseInt(targetVersion[0],10) - parseInt(currVersion[0],10),
-				parseInt(targetVersion[1],10) - parseInt(currVersion[1],10),
-				parseInt(targetVersion[2],10) - parseInt(currVersion[2],10)];
+$tw.utils.parseVersion = function(version) {
+	var match = /^((\d+)\.(\d+)\.(\d+))(?:-([\dA-Za-z\-]+(?:\.[\dA-Za-z\-]+)*))?(?:\+([\dA-Za-z\-]+(?:\.[\dA-Za-z\-]+)*))?$/.exec(version);
+	if(match) {
+		return {
+			version: match[1],
+			major: parseInt(match[2],10),
+			minor: parseInt(match[3],10),
+			patch: parseInt(match[4],10),
+			prerelease: match[5],
+			build: match[6]
+		};
+	} else {
+		return null;
+	}
+};
+
+/*
+Returns true if the version string A is greater than the version string B
+*/
+$tw.utils.checkVersions = function(versionStringA,versionStringB) {
+	var versionA = $tw.utils.parseVersion(versionStringA),
+		versionB = $tw.utils.parseVersion(versionStringB),
+		diff = [
+			versionA.major - versionB.major,
+			versionA.minor - versionB.minor,
+			versionA.patch - versionB.patch
+		];
 	return (diff[0] > 0) ||
 		(diff[0] === 0 && diff[1] > 0) ||
 		(diff[0] === 0 && diff[1] === 0 && diff[2] > 0);
@@ -555,6 +576,7 @@ $tw.modules.execute = function(moduleName,moduleRoot) {
 			clearInterval: clearInterval,
 			setTimeout: setTimeout,
 			clearTimeout: clearTimeout,
+			Buffer: $tw.browser ? {} : Buffer,
 			$tw: $tw,
 			require: function(title) {
 				return $tw.modules.execute(title, name);
@@ -1131,10 +1153,17 @@ $tw.loadTiddlersFromFile = function(filepath,fields) {
 };
 
 /*
+A default set of files for TiddlyWiki to ignore during load.
+This matches what NPM ignores, and adds "*.meta" to ignore tiddler
+metadata files.
+*/
+$tw.boot.excludeRegExp = /^\.DS_Store$|^.*\.meta$|^\..*\.swp$|^\._.*$|^\.git$|^\.hg$|^\.lock-wscript$|^\.svn$|^\.wafpickle-.*$|^CVS$|^npm-debug\.log$/;
+
+/*
 Load all the tiddlers recursively from a directory, including honouring `tiddlywiki.files` files for drawing in external files. Returns an array of {filepath:,type:,tiddlers: [{..fields...}],hasMetaFile:}. Note that no file information is returned for externally loaded tiddlers, just the `tiddlers` property.
 */
 $tw.loadTiddlersFromPath = function(filepath,excludeRegExp) {
-	excludeRegExp = excludeRegExp || /^\.DS_Store$|.meta$/;
+	excludeRegExp = excludeRegExp || $tw.boot.excludeRegExp;
 	var tiddlers = [];
 	if(fs.existsSync(filepath)) {
 		var stat = fs.statSync(filepath);
@@ -1176,7 +1205,7 @@ $tw.loadTiddlersFromPath = function(filepath,excludeRegExp) {
 Load the tiddlers from a plugin folder, and package them up into a proper JSON plugin tiddler
 */
 $tw.loadPluginFolder = function(filepath,excludeRegExp) {
-	excludeRegExp = excludeRegExp || /^\.DS_Store$|.meta$/;
+	excludeRegExp = excludeRegExp || $tw.boot.excludeRegExp;
 	var stat, files, pluginInfo, pluginTiddlers = [], f, file, titlePrefix, t;
 	if(fs.existsSync(filepath)) {
 		stat = fs.statSync(filepath);
@@ -1210,18 +1239,33 @@ $tw.loadPluginFolder = function(filepath,excludeRegExp) {
 		var fields = {
 			title: pluginInfo.title,
 			type: "application/json",
-			text: JSON.stringify(pluginInfo,null,4),
+			text: JSON.stringify({tiddlers: pluginInfo.tiddlers},null,4),
 			"plugin-priority": pluginInfo["plugin-priority"],
 			"name": pluginInfo["name"],
 			"version": pluginInfo["version"],
 			"thumbnail": pluginInfo["thumbnail"],
 			"description": pluginInfo["description"],
-			"plugin-type": pluginInfo["plugin-type"] || "plugin"
+			"plugin-type": pluginInfo["plugin-type"] || "plugin",
+			"dependents": $tw.utils.stringifyList(pluginInfo["dependents"] || [])
 		}
 		return fields;
 	} else {
 		return null;
 	}
+};
+
+/*
+Fallback tiddlywiki.info content
+*/
+$tw.boot.defaultWikiInfo = {
+	"plugins": [
+		"tiddlywiki/tiddlyweb",
+		"tiddlywiki/filesystem"
+	],
+	"themes": [
+		"tiddlywiki/vanilla",
+		"tiddlywiki/snowwhite"
+	]
 };
 
 /*
@@ -1231,13 +1275,14 @@ parentPaths: array of parent paths that we mustn't recurse into
 $tw.loadWikiTiddlers = function(wikiPath,parentPaths) {
 	parentPaths = parentPaths || [];
 	var wikiInfoPath = path.resolve(wikiPath,$tw.config.wikiInfo),
-		wikiInfo = {},
+		wikiInfo,
 		pluginFields;
 	// Bail if we don't have a wiki info file
-	if(!fs.existsSync(wikiInfoPath)) {
-		$tw.utils.error("Missing tiddlywiki.info file at " + wikiPath);
+	if(fs.existsSync(wikiInfoPath)) {
+		wikiInfo = JSON.parse(fs.readFileSync(wikiInfoPath,"utf8"));
+	} else {
+		wikiInfo = $tw.boot.defaultWikiInfo;
 	}
-	wikiInfo = JSON.parse(fs.readFileSync(wikiInfoPath,"utf8"));
 	// Load any parent wikis
 	if(wikiInfo.includeWikis) {
 		parentPaths = parentPaths.slice(0);
@@ -1389,6 +1434,7 @@ $tw.boot.startup = function() {
 	$tw.utils.registerFileType("image/png","base64",".png");
 	$tw.utils.registerFileType("image/gif","base64",".gif");
 	$tw.utils.registerFileType("image/svg+xml","utf8",".svg");
+	$tw.utils.registerFileType("image/x-icon","base64",".ico");
 	$tw.utils.registerFileType("application/font-woff","base64",".woff");
 	// Create the wiki store for the app
 	$tw.wiki = new $tw.Wiki();

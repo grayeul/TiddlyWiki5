@@ -49,27 +49,57 @@ SimpleServer.prototype.addRoute = function(route) {
 	this.routes.push(route);
 };
 
+SimpleServer.prototype.findMatchingRoute = function(request,state) {
+	for(var t=0; t<this.routes.length; t++) {
+		var potentialRoute = this.routes[t],
+			pathRegExp = potentialRoute.path,
+			match = potentialRoute.path.exec(state.urlInfo.pathname);
+		if(match && request.method === potentialRoute.method) {
+			state.params = [];
+			for(var p=1; p<match.length; p++) {
+				state.params.push(match[p]);
+			}
+			return potentialRoute;
+		}
+	}
+	return null;
+};
+
+SimpleServer.prototype.checkCredentials = function(request,incomingUsername,incomingPassword) {
+	var header = request.headers["authorization"] || "",
+		token = header.split(/\s+/).pop() || "",
+		auth = $tw.utils.base64Decode(token),
+		parts = auth.split(/:/),
+		username = parts[0],
+		password = parts[1];
+	if(incomingUsername === username && incomingPassword === password) {
+		return "ALLOWED";
+	} else {
+		return "DENIED";
+	}
+}
+
 SimpleServer.prototype.listen = function(port) {
 	var self = this;
-	http.createServer(function(request, response) {
+	http.createServer(function(request,response) {
 		// Compose the state object
 		var state = {};
 		state.wiki = self.wiki;
 		state.server = self;
 		state.urlInfo = url.parse(request.url);
 		// Find the route that matches this path
-		var route;
-		for(var t=0; t<self.routes.length; t++) {
-			var potentialRoute = self.routes[t],
-				pathRegExp = potentialRoute.path,
-				match = potentialRoute.path.exec(state.urlInfo.pathname);
-			if(request.method === potentialRoute.method && match) {
-				state.params = [];
-				for(var p=1; p<match.length; p++) {
-					state.params.push(match[p]);
-				}
-				route = potentialRoute;
-				break;
+		var route = self.findMatchingRoute(request,state);
+		// Check for the username and password if we've got one
+		var username = self.get("username"),
+			password = self.get("password");
+		if(username && password) {
+			// Check they match
+			if(self.checkCredentials(request,username,password) !== "ALLOWED") {
+				response.writeHead(401,"Authentication required",{
+					"WWW-Authenticate": 'Basic realm="Please provide your username and password to login to TiddlyWiki5"'
+				});
+				response.end();
+				return;
 			}
 		}
 		// Return a 404 if we didn't find a route
@@ -168,11 +198,20 @@ var Command = function(params,commander,callback) {
 	});
 	this.server.addRoute({
 		method: "GET",
+		path: /^\/favicon.ico$/,
+		handler: function(request,response,state) {
+			response.writeHead(200, {"Content-Type": "image/x-icon"});
+			var buffer = state.wiki.getTiddlerText("$:/favicon.ico","");
+			response.end(buffer,"base64");
+		}
+	});
+	this.server.addRoute({
+		method: "GET",
 		path: /^\/recipes\/default\/tiddlers.json$/,
 		handler: function(request,response,state) {
 			response.writeHead(200, {"Content-Type": "application/json"});
 			var tiddlers = [];
-			state.wiki.forEachTiddler("title",function(title,tiddler) {
+			state.wiki.forEachTiddler({sortField: "title"},function(title,tiddler) {
 				var tiddlerFields = {};
 				$tw.utils.each(tiddler.fields,function(field,name) {
 					if(name !== "text") {
@@ -221,20 +260,21 @@ var Command = function(params,commander,callback) {
 
 Command.prototype.execute = function() {
 	var port = this.params[0] || "8080",
-		rootTiddler = this.params[1] || "$:/core/templates/tiddlywiki5.template.html",
+		rootTiddler = this.params[1] || "$:/core/save/all",
 		renderType = this.params[2] || "text/plain",
 		serveType = this.params[3] || "text/html",
-		username = this.params[4] || "ANONYMOUS";
+		username = this.params[4],
+		password = this.params[5];
 	this.server.set({
 		rootTiddler: rootTiddler,
 		renderType: renderType,
 		serveType: serveType,
-		username: username
+		username: username,
+		password: password
 	});
 	this.server.listen(port);
-	if(this.commander.verbose) {
-		console.log("Serving on port " + port);
-	}
+	console.log("Serving on port " + port);
+	console.log("(press ctrl-C to exit)");
 	return null;
 };
 

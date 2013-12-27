@@ -1,28 +1,13 @@
-created: 201311191945
-creator: JeremyRuston
-modified: 201311191945
-modifier: JeremyRuston
+created: 20131119194500000
+modified: 20131212094150331
 tags: introduction
 title: Download
+type: text/vnd.tiddlywiki
 
-! Download Single File Editions
+Download single file editions of version ''<<version>>'' of TiddlyWiki:
 
-Right click and download these links to single file editions of TiddlyWiki5:
+|{{$:/editions/tw5.com/snippets/download-empty-button}}|Get started with an empty wiki |
+|{{$:/snippets/download-wiki-button}}|Download a full copy of this site, including all the documentation |
 
-* [[empty|http://five.tiddlywiki.com/empty]]
-* [[tw5.com|http://five.tiddlywiki.com/]]
-
-! Download Node.js Edition
-
-For working on the command line with the Node.js edition of TiddlyWiki5, you can install TiddlyWiki via [[npm|http://npmjs.org]]:
-
-```
-npm -g install tiddlywiki
-```
-
-The `-g` flag causes TiddlyWiki to be installed globally.
-
-You can also download or fork the TiddlyWiki5 GitHub repo directly:
-
-https://github.com/Jermolene/TiddlyWiki5
+For more advanced configurations, you can run [[TiddlyWiki on Node.js]].
 

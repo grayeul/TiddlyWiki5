@@ -1,18 +1,31 @@
-created: 201309091516000
-creator: JeremyRuston
-modified: 201311221855003
-modifier: JeremyRuston
+created: 20130909151600000
+modified: 20131218094207015
 tags: community
 title: Community
 type: text/vnd.tiddlywiki
 
+TiddlyWiki is made much more useful by its vibrant community of users and OpenSource developers.
+
+! Community Forums
+
+The TiddlyWiki discussion groups are mailing lists for talking about TiddlyWiki: requests for help, announcements of new releases and plugins, debating new features, or just sharing experiences.
+
+* The main TiddlyWiki group: http://groups.google.com/group/TiddlyWiki
+* The TiddlyWikiDev group for developers: http://groups.google.com/group/TiddlyWikiDev
+* Follow [[@TiddlyWiki on Twitter|http://twitter.com/#!/TiddlyWiki]] for the latest news
+* Get involved in the [[development on GitHub|https://github.com/Jermolene/TiddlyWiki5]]
+* Watch recordings of our regular [[TiddlyWiki Hangouts]]
+
 ! Resources for TiddlyWiki5
 
 * [[TW5 Mall|http://www.giffmex.org/tw5mall.htm]] -- DaveGifford's growing catalogue of hints and tips
-* A [[guide to creating a fixed top menu|https://dl.dropboxusercontent.com/u/2638511/TW5_Test.htm]] from TonGerner
+* A [[guide to creating a top menu and toolbars|http://tw5toolbar.tiddlyspot.com/]] from TonGerner
 * A [[TW5Magick|http://tw5magick.tiddlyspot.com/]] -- a collection of hints and tips from StephanHradek
 * A new theme from [[BobRobison|http://tw5gray.tiddlyspot.com]]
 * [[Bestrew|http://nocategories.net/tiddlywiki/bestrew.html]] -- DylanKinnett's adaptation of TiddlyWiki5 as a writers manuscript submission tracker
+* [[tw5-zh|http://tw5-zh.tiddlyspot.com]], a Chinese translation of TiddlyWiki5 by BramChen
+* [[Coding for TiddlyWiki5|http://cjhunt.github.io]], an introduction to developing extensions and plugins from ChrisHunt
+* [[Hosting TiddlyWiki5 on GoogleDrive|https://googledrive.com/host/0B51gSXixfJ2Qb0I4R2M4MWJVMlU]] from TonyChing
 
 ! Blog posts and articles about TiddlyWiki5
 
@@ -21,5 +34,7 @@ type: text/vnd.tiddlywiki
 
 ! Examples of TiddlyWiki5 being used in the wild
 
-|!Site |!Description |
-|http://freedombits.org |A manifesto for the preservation of free speech through the exchange of randomized data |
+; http://freedombits.org
+: A manifesto for the preservation of free speech through the exchange of randomized data
+; http://giffmex.org/nt/1johnnotebase.html
+: A study notebook for the Bible

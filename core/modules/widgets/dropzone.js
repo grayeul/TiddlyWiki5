@@ -90,8 +90,8 @@ DropZoneWidget.prototype.handleDropEvent  = function(event) {
 	// Try to import the various data types we understand
 	this.importData(dataTransfer);
 	// Import any files in the drop
-	this.wiki.readFiles(dataTransfer.files,function(tiddlerFields) {
-		self.dispatchEvent({type: "tw-import-tiddlers", param: JSON.stringify([tiddlerFields])});
+	this.wiki.readFiles(dataTransfer.files,function(tiddlerFieldsArray) {
+		self.dispatchEvent({type: "tw-import-tiddlers", param: JSON.stringify(tiddlerFieldsArray)});
 	});
 	// Tell the browser that we handled the drop
 	event.preventDefault();
@@ -100,30 +100,62 @@ DropZoneWidget.prototype.handleDropEvent  = function(event) {
 };
 
 DropZoneWidget.prototype.importData = function(dataTransfer) {
+	// Try each provided data type in turn
 	for(var t=0; t<this.importDataTypes.length; t++) {
-		var dataType = this.importDataTypes[t];
-		var data = dataTransfer.getData(dataType.type);
-		if(data !== "") {
-			var tiddlerFields = dataType.convertToFields(data);
-			if(!tiddlerFields.title) {
-				tiddlerFields.title = this.wiki.generateNewTitle("Untitled");
+		if(!$tw.browser.isIE || this.importDataTypes[t].IECompatible) {
+			// Get the data
+			var dataType = this.importDataTypes[t];
+				var data = dataTransfer.getData(dataType.type);
+			// Import the tiddlers in the data
+			if(data !== "" && data !== null) {
+				var tiddlerFields = dataType.convertToFields(data);
+				if(!tiddlerFields.title) {
+					tiddlerFields.title = this.wiki.generateNewTitle("Untitled");
+				}
+				this.dispatchEvent({type: "tw-import-tiddlers", param: JSON.stringify([tiddlerFields])});
+				return;
 			}
-			this.dispatchEvent({type: "tw-import-tiddlers", param: JSON.stringify([tiddlerFields])});
-			return;
 		}
 	};
 };
 
 DropZoneWidget.prototype.importDataTypes = [
-	{type: "text/vnd.tiddler", convertToFields: function(data) {
+	{type: "text/vnd.tiddler", IECompatible: false, convertToFields: function(data) {
 		return JSON.parse(data);
 	}},
-	{type: "text/plain", convertToFields: function(data) {
+	{type: "URL", IECompatible: true, convertToFields: function(data) {
+		// Check for tiddler data URI
+		var match = decodeURI(data).match(/^data\:text\/vnd\.tiddler,(.*)/i);
+		if(match) {
+			return JSON.parse(match[1]);
+		} else {
+			return { // As URL string
+				text: data
+			};
+		}
+	}},
+	{type: "text/x-moz-url", IECompatible: false, convertToFields: function(data) {
+		// Check for tiddler data URI
+		var match = decodeURI(data).match(/^data\:text\/vnd\.tiddler,(.*)/i);
+		if(match) {
+			return JSON.parse(match[1]);
+		} else {
+			return { // As URL string
+				text: data
+			};
+		}
+	}},
+	{type: "text/plain", IECompatible: false, convertToFields: function(data) {
 		return {
 			text: data
 		};
 	}},
-	{type: "text/uri-list", convertToFields: function(data) {
+	{type: "Text", IECompatible: true, convertToFields: function(data) {
+		return {
+			text: data
+		};
+	}},
+	{type: "text/uri-list", IECompatible: false, convertToFields: function(data) {
 		return {
 			text: data
 		};

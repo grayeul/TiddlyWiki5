@@ -38,10 +38,14 @@ function FileSystemAdaptor(syncer) {
 			});
 	}
 
-
 	for(var f in $tw.boot.files) {
 		var fileInfo = $tw.boot.files[f];
 		this.setwatcher(fileInfo.filepath, f);
+	}
+	// Create the <wiki>/tiddlers folder if it doesn't exist
+	// TODO: we should create the path recursively
+	if(!fs.existsSync($tw.boot.wikiTiddlersPath)) {
+		fs.mkdirSync($tw.boot.wikiTiddlersPath);
 	}
 }
 
@@ -178,10 +182,11 @@ console.log("FileSystem: Saved file",fileInfo.filepath);
 
 /*
 Load a tiddler and invoke the callback with (err,tiddlerFields)
+
+We don't need to implement loading for the file system adaptor, because all the tiddler files will have been loaded during the boot process.
 */
 FileSystemAdaptor.prototype.loadTiddler = function(title,callback) {
-console.log("FileSystem: Loading",title);
-	callback(null,{title: title, text: "Fake tiddler: " + title});
+	callback(null,null);
 };
 
 /*

@@ -91,7 +91,7 @@ LinkWidget.prototype.handleClickEvent = function (event) {
 	this.dispatchEvent({
 		type: "tw-navigate",
 		navigateTo: this.to,
-		navigateFromTitle: this.getVariable("currentTiddler"),
+		navigateFromTitle: this.getVariable("storyTiddler"),
 		navigateFromNode: this,
 		navigateFromClientRect: { top: bounds.top, left: bounds.left, width: bounds.width, right: bounds.right, bottom: bounds.bottom, height: bounds.height
 		}
@@ -114,21 +114,32 @@ LinkWidget.prototype.handleDragStartEvent = function(event) {
 		this.dragImage.appendChild(inner);
 		this.document.body.appendChild(this.dragImage);
 		// Astoundingly, we need to cover the dragger up: http://www.kryogenix.org/code/browser/custom-drag-image.html
-		var bounds = this.dragImage.firstChild.getBoundingClientRect(),
-			cover = this.document.createElement("div");
+		var cover = this.document.createElement("div");
 		cover.className = "tw-tiddler-dragger-cover";
-		cover.style.left = (bounds.left - 16) + "px";
-		cover.style.top = (bounds.top - 16) + "px";
-		cover.style.width = (bounds.width + 32) + "px";
-		cover.style.height = (bounds.height + 32) + "px";
+		cover.style.left = (inner.offsetLeft - 16) + "px";
+		cover.style.top = (inner.offsetTop - 16) + "px";
+		cover.style.width = (inner.offsetWidth + 32) + "px";
+		cover.style.height = (inner.offsetHeight + 32) + "px";
 		this.dragImage.appendChild(cover);
 		// Set the data transfer properties
 		var dataTransfer = event.dataTransfer;
+		// First the image
 		dataTransfer.effectAllowed = "copy";
-		dataTransfer.setDragImage(this.dragImage.firstChild,-16,-16);
+		if(dataTransfer.setDragImage) {
+			dataTransfer.setDragImage(this.dragImage.firstChild,-16,-16);
+		}
+		// Then the data
 		dataTransfer.clearData();
-		dataTransfer.setData("text/vnd.tiddler",this.wiki.getTiddlerAsJson(this.to));
-		dataTransfer.setData("text/plain",this.wiki.getTiddlerText(this.to,""));
+		var jsonData = this.wiki.getTiddlerAsJson(this.to),
+			textData = this.wiki.getTiddlerText(this.to,"");
+		// IE doesn't like these content types
+		if(!$tw.browser.isIE) {
+			dataTransfer.setData("text/vnd.tiddler",jsonData);
+			dataTransfer.setData("text/plain",textData);
+			dataTransfer.setData("text/x-moz-url","data:text/vnd.tiddler," + encodeURI(jsonData));
+		}
+		dataTransfer.setData("URL","data:text/vnd.tiddler," + encodeURI(jsonData));
+		dataTransfer.setData("Text",textData);
 		event.stopPropagation();
 	} else {
 		event.preventDefault();

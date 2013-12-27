@@ -68,13 +68,11 @@ Syncer.prototype.init = function() {
 	// Hashmap by title of {revision:,changeCount:,adaptorInfo:}
 	this.tiddlerInfo = {};
 	// Record information for known tiddlers
-	this.wiki.forEachTiddler(function(title,tiddler) {
-		if(tiddler.fields["revision"]) {
-			self.tiddlerInfo[title] = {
-				revision: tiddler.fields["revision"],
-				adaptorInfo: self.syncadaptor.getTiddlerInfo(tiddler),
-				changeCount: self.wiki.getChangeCount(title)
-			}
+	this.wiki.forEachTiddler({includeSystem: true},function(title,tiddler) {
+		self.tiddlerInfo[title] = {
+			revision: tiddler.fields["revision"],
+			adaptorInfo: self.syncadaptor.getTiddlerInfo(tiddler),
+			changeCount: self.wiki.getChangeCount(title)
 		}
 	});
 	// Tasks are {type: "load"/"save"/"delete", title:, queueTime:, lastModificationTime:}
@@ -385,6 +383,9 @@ Syncer.prototype.processTaskQueue = function() {
 			this.taskInProgress[task.title] = task;
 			// Dispatch the task
 			this.dispatchTask(task,function(err) {
+				if(err) {
+					console.log("Sync error while processing '" + task.title + "':\n" + err);
+				}
 				// Mark that this task is no longer in progress
 				delete self.taskInProgress[task.title];
 				// Process the next task
@@ -436,19 +437,21 @@ Syncer.prototype.dispatchTask = function(task,callback) {
 		var changeCount = this.wiki.getChangeCount(task.title),
 			tiddler = this.wiki.getTiddler(task.title);
 		this.log("Dispatching 'save' task:",task.title);
-		this.syncadaptor.saveTiddler(tiddler,function(err,adaptorInfo,revision) {
-			if(err) {
-				return callback(err);
-			}
-			// Adjust the info stored about this tiddler
-			self.tiddlerInfo[task.title] = {
-				changeCount: changeCount,
-				adaptorInfo: adaptorInfo,
-				revision: revision
-			};
-			// Invoke the callback
-			callback(null);
-		});
+		if(tiddler) {
+			this.syncadaptor.saveTiddler(tiddler,function(err,adaptorInfo,revision) {
+				if(err) {
+					return callback(err);
+				}
+				// Adjust the info stored about this tiddler
+				self.tiddlerInfo[task.title] = {
+					changeCount: changeCount,
+					adaptorInfo: adaptorInfo,
+					revision: revision
+				};
+				// Invoke the callback
+				callback(null);
+			});
+		}
 	} else if(task.type === "load") {
 		// Load the tiddler
 		this.log("Dispatching 'load' task:",task.title);
@@ -457,7 +460,9 @@ Syncer.prototype.dispatchTask = function(task,callback) {
 				return callback(err);
 			}
 			// Store the tiddler
-			self.storeTiddler(tiddlerFields);
+			if(tiddlerFields) {
+				self.storeTiddler(tiddlerFields);
+			}
 			// Invoke the callback
 			callback(null);
 		});

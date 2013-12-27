@@ -119,3 +119,10 @@ Bob Robison, @grayeul, 2013/11/11
 
 Adrian Sampaleanu, @asampal, 2013/11/17
 
+David Jade, @davidjade, 2013/11/30
+
+Stephan Hradek, @Skeeve, 2013/11/30
+
+Brian Shaver, @shakerlxxv, 2013/12/07
+
+Paul Bond, @willover, 2013/12/17

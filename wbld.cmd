@@ -1,4 +1,4 @@
-@echo
+@echo off
 
 rem build the TiddlyWeb edition of TiddlyWiki5 and upload it to TiddlySpace. Requires the TiddlySpace credentials
 rem of a member of the tw5tiddlyweb space
@@ -15,7 +15,7 @@ rem Open the tw5tiddlyweb edition in TW5 and save the template for the main HTML
 node .\tiddlywiki.js ^
 	editions\tw5tiddlyweb ^
 	--verbose ^
-	--rendertiddler $:/core/templates/tiddlywiki5.template.html tmp\tiddlyweb.html text/plain ^
+	--rendertiddler $:/core/save/all tmp\tiddlyweb.html text/plain ^
 	|| exit 1
 
 rem Prepend the type information that TiddlyWeb needs to turn the .html file into a .tid file

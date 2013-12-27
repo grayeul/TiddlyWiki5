@@ -1,10 +1,13 @@
 {
 	"plugins": [
 		"tiddlywiki/fullscreen",
+		"tiddlywiki/googleanalytics",
 		"tiddlywiki/github-fork-ribbon"
 	],
 	"themes": [
+		"tiddlywiki/vanilla",
 		"tiddlywiki/snowwhite",
+		"tiddlywiki/nighttime",
 		"tiddlywiki/starlight",
 		"tiddlywiki/stickytitles",
 		"tiddlywiki/centralised",

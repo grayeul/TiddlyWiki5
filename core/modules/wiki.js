@@ -173,11 +173,11 @@ exports.tiddlerExists = function(title) {
 Generate an unused title from the specified base
 */
 exports.generateNewTitle = function(baseTitle) {
-	var c = 0;
-	do {
-		var title = baseTitle + (c ? " " + (c + 1) : "");
-		c++;
-	} while(this.tiddlerExists(title));
+	var c = 0,
+	    title = baseTitle;
+	while(this.tiddlerExists(title)) {
+		title = baseTitle + " " + (++c);
+	};
 	return title;
 };
 
@@ -211,6 +211,23 @@ exports.addTiddler = function(tiddler) {
 };
 
 /*
+Like addTiddler() except it will silently reject any plugin tiddlers that are older than the currently loaded version. Returns true if the tiddler was imported
+*/
+exports.importTiddler = function(tiddler) {
+	var existingTiddler = this.getTiddler(tiddler.fields.title);
+	// Check if we're dealing with a plugin
+	if(tiddler && tiddler.hasField("plugin-type") && tiddler.hasField("version") && existingTiddler && existingTiddler.hasField("plugin-type") && existingTiddler.hasField("version")) {
+		// Reject the incoming plugin if it is older
+		if($tw.utils.checkVersions(existingTiddler.fields.version,tiddler.fields.version)) {
+			return false;
+		}
+	}
+	// Fall through to adding the tiddler
+	this.addTiddler(tiddler);
+	return true;
+};
+
+/*
 Return a hashmap of the fields that should be set when a tiddler is created
 */
 exports.getCreationFields = function() {
@@ -238,14 +255,23 @@ exports.getModificationFields = function() {
 };
 
 /*
-Return a sorted array of non-system tiddler titles, optionally filtered by a tag 
+Return a sorted array of tiddler titles.  Options include:
+sortField: field to sort by
+excludeTag: tag to exclude
+includeSystem: whether to include system tiddlers (defaults to false)
 */
-exports.getTiddlers = function(sortField,excludeTag) {
-	sortField = sortField || "title";
-	var tiddlers = [], t, titles = [];
+exports.getTiddlers = function(options) {
+	options = options || {};
+	var self = this,
+		sortField = options.sortField || "title",
+		tiddlers = [], t, titles = [];
 	for(t in this.tiddlers) {
-		if($tw.utils.hop(this.tiddlers,t) && !this.isSystemTiddler(t) && (!excludeTag || !this.tiddlers[t].hasTag(excludeTag))) {
-			tiddlers.push(this.tiddlers[t]);
+		if($tw.utils.hop(this.tiddlers,t)) {
+			if(options.includeSystem || !this.isSystemTiddler(t)) {
+				if(!options.excludeTag || !this.tiddlers[t].hasTag(excludeTag)) {
+					tiddlers.push(this.tiddlers[t]);
+				}
+			}
 		}
 	}
 	tiddlers.sort(function(a,b) {
@@ -268,7 +294,7 @@ exports.getTiddlers = function(sortField,excludeTag) {
 };
 
 exports.countTiddlers = function(excludeTag) {
-	var tiddlers = this.getTiddlers(null,excludeTag);
+	var tiddlers = this.getTiddlers({excludeTag: excludeTag});
 	return $tw.utils.count(tiddlers);
 };
 
@@ -306,12 +332,17 @@ exports.sortTiddlers = function(titles,sortField,isDescending,isCaseSensitive) {
 	});
 };
 
-exports.forEachTiddler = function(/* [sortField,[excludeTag,]]callback */) {
+/*
+For every tiddler invoke a callback(title,tiddler) with `this` set to the wiki object. Options include:
+sortField: field to sort by
+excludeTag: tag to exclude
+includeSystem: whether to include system tiddlers (defaults to false)
+*/
+exports.forEachTiddler = function(/* [options,]callback */) {
 	var arg = 0,
-		sortField = arguments.length > 1 ? arguments[arg++] : null,
-		excludeTag = arguments.length > 2 ? arguments[arg++] : null,
+		options = arguments.length >= 2 ? arguments[arg++] : {},
 		callback = arguments[arg++],
-		titles = this.getTiddlers(sortField,excludeTag),
+		titles = this.getTiddlers(options),
 		t, tiddler;
 	for(t=0; t<titles.length; t++) {
 		tiddler = this.tiddlers[titles[t]];
@@ -740,7 +771,7 @@ exports.parseTextReference = function(title,field,index,options) {
 			if(text === undefined) {
 				text = "";
 			}
-			return this.parseText("text/vnd.tiddlywiki",text,options);
+			return this.parseText("text/vnd.tiddlywiki",text.toString(),options);
 		} else if(index) {
 			text = this.extractTiddlerDataItem(title,index,"");
 			return this.parseText("text/vnd.tiddlywiki",text,options);
@@ -866,16 +897,22 @@ exports.callSaver = function(method /*, args */ ) {
 
 /*
 Save the wiki contents. Options are:
+	method: "save" or "download"
 	template: the tiddler containing the template to save
 	downloadType: the content type for the saved file
 */
 exports.saveWiki = function(options) {
 	options = options || {};
-	var template = options.template || "$:/core/templates/tiddlywiki5.template.html",
+	var method = options.method || "save",
+		template = options.template || "$:/core/save/all",
 		downloadType = options.downloadType || "text/plain";
 	var text = this.renderTiddler(downloadType,template);
-	this.callSaver("save",text,function(err) {
-		$tw.notifier.display("$:/messages/Saved");
+	this.callSaver("save",text,method,function(err) {
+		if(err) {
+			alert("Error while saving:\n\n" + err);
+		} else {
+			$tw.notifier.display("$:/messages/Saved");
+		}
 	});
 };
 
@@ -903,7 +940,7 @@ exports.search = function(text,options) {
 			searchTermsRegExps = [new RegExp("(" + $tw.utils.escapeRegExp(text) + ")",flags)];
 		}
 	} else {
-		terms = text.replace(/( +)/g," ").split(" ");
+		terms = text.split(/ +/);
 		if(terms.length === 1 && terms[0] === "") {
 			searchTermsRegExps = null;
 		} else {
@@ -987,16 +1024,23 @@ exports.getTiddlerText = function(title,defaultText) {
 };
 
 /*
-Read an array of browser File objects, invoking callback(tiddlerFields) for each loaded file
+Read an array of browser File objects, invoking callback(tiddlerFieldsArray) once they're all read
 */
 exports.readFiles = function(files,callback) {
+	var result = [],
+		outstanding = files.length;
 	for(var f=0; f<files.length; f++) {
-		this.readFile(files[f],callback);
+		this.readFile(files[f],function(tiddlerFieldsArray) {
+			result.push.apply(result,tiddlerFieldsArray);
+			if(--outstanding === 0) {
+				callback(result);
+			}
+		});
 	};
 };
 
 /*
-Read a browser File object, invoking callback(tiddlerFields) with the tiddler fields object
+Read a browser File object, invoking callback(tiddlerFieldsArray) with an array of tiddler fields objects
 */
 exports.readFile = function(file,callback) {
 	// Get the type, falling back to the filename extension
@@ -1026,15 +1070,10 @@ exports.readFile = function(file,callback) {
 			var commaPos = event.target.result.indexOf(",");
 			if(commaPos !== -1) {
 				tiddlerFields.text = event.target.result.substr(commaPos+1);
-				callback(tiddlerFields);
+				callback([tiddlerFields]);
 			}
 		} else {
-			var tiddlers = self.deserializeTiddlers(type,event.target.result,tiddlerFields);
-			if(tiddlers) {
-				$tw.utils.each(tiddlers,function(tiddlerFields) {
-					callback(tiddlerFields);
-				});
-			}
+			callback(self.deserializeTiddlers(type,event.target.result,tiddlerFields));
 		}
 	};
 	// Kick off the read

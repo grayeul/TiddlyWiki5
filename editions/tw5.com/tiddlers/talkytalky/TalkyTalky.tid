@@ -1,7 +1,5 @@
 created: 201308252131
-creator: JeremyRuston
 modified: 201308252131
-modifier: JeremyRuston
 tags: talkytalky
 title: TalkyTalky
 
@@ -28,7 +26,7 @@ Store your tiddlers in a single HTML file along with the JS
 # Create tiddlers, show links, missing, orphans, tags, tagging, references
 # Use missing tiddlers to find a typo
 # Show shadow tiddlers and system tiddlers
-# Show stylesheet handling - [[$:/themes/tiddlywiki/snowwhite/base]]
+# Show stylesheet handling - [[$:/themes/tiddlywiki/vanilla/base]]
 # Drag an image from the file system
 # Use the image in a tiddler
 # Edit the image

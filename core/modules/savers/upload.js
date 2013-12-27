@@ -21,7 +21,11 @@ var UploadSaver = function(wiki) {
 	this.wiki = wiki;
 };
 
-UploadSaver.prototype.save = function(text) {
+UploadSaver.prototype.save = function(text,method,callback) {
+	// Bail out unless this is a save (rather than a download)
+	if(method !== "save") {
+		return false;
+	}
 	// Get the various parameters we need
 	var backupDir = ".",
 		username = this.wiki.getTextReference("$:/UploadName"),
@@ -56,10 +60,15 @@ UploadSaver.prototype.save = function(text) {
 	http.setRequestHeader("Content-Type","multipart/form-data; ;charset=UTF-8; boundary=" + boundary);
 	http.onreadystatechange = function() {
 		if(http.readyState == 4 && http.status == 200) {
-			window.alert(http.responseText);
+			if(http.responseText.trim() === "0 - Fileindex.html") {
+				callback(null);
+			} else {
+				callback(http.responseText);
+			}
 		}
 	};
 	http.send(data);
+	$tw.notifier.display("$:/messages/StartingSave");
 	return true;
 };
 

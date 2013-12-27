@@ -36,30 +36,35 @@ var parseTiddlerDiv = function(text /* [,fields] */) {
 		}
 	}
 	// Parse the DIV body
-	var divRegExp = /^\s*<div\s+([^>]*)>((?:\s|\S)*)<\/div>\s*$/gi,
-		subDivRegExp = /^\s*<pre>((?:\s|\S)*)<\/pre>\s*$/gi,
-		attrRegExp = /\s*([^=\s]+)\s*=\s*"([^"]*)"/gi,
-		match = divRegExp.exec(text);
+	var startRegExp = /^\s*<div\s+([^>]*)>(\s*<pre>)?/gi,
+		endRegExp,
+		match = startRegExp.exec(text);
 	if(match) {
-		var subMatch = subDivRegExp.exec(match[2]); // Body of the <DIV> tag
-		if(subMatch) {
-			result.text = subMatch[1];
+		// Old-style DIVs don't have the <pre> tag
+		if(match[2]) {
+			endRegExp = /<\/pre>\s*<\/div>\s*$/gi;
 		} else {
-			result.text = match[2]; 
+			endRegExp = /<\/div>\s*$/gi;
 		}
-		var attrMatch;
-		do {
-			attrMatch = attrRegExp.exec(match[1]);
-			if(attrMatch) {
-				var name = attrMatch[1];
-				var value = attrMatch[2];
-				result[name] = value;
-			}
-		} while(attrMatch);
-		return result;
-	} else {
-		return undefined;
+		var endMatch = endRegExp.exec(text);
+		if(endMatch) {
+			// Extract the text
+			result.text = text.substring(match.index + match[0].length,endMatch.index);
+			// Process the attributes
+			var attrRegExp = /\s*([^=\s]+)\s*=\s*"([^"]*)"/gi,
+				attrMatch;
+			do {
+				attrMatch = attrRegExp.exec(match[1]);
+				if(attrMatch) {
+					var name = attrMatch[1];
+					var value = attrMatch[2];
+					result[name] = value;
+				}
+			} while(attrMatch);
+			return result;
+		}
 	}
+	return undefined;
 };
 
 exports["application/x-tiddler-html-div"] = function(text,fields) {
@@ -96,7 +101,15 @@ exports["text/html"] = function(text,fields) {
 		match = storeAreaMarkerRegExp.exec(text);
 	if(match) {
 		// If so, it's either a classic TiddlyWiki file or a TW5 file
-		return deserializeTiddlyWikiFile(text,storeAreaMarkerRegExp.lastIndex,!!match[1],fields);
+		// First read the normal tiddlers
+		var results = deserializeTiddlyWikiFile(text,storeAreaMarkerRegExp.lastIndex,!!match[1],fields);
+		// Then any system tiddlers
+		var systemAreaMarkerRegExp = /<div id=["']?systemArea['"]?( style=["']?display:none;["']?)?>/gi,
+			sysMatch = systemAreaMarkerRegExp.exec(text);
+		if(sysMatch) {
+			results.push.apply(results,deserializeTiddlyWikiFile(text,systemAreaMarkerRegExp.lastIndex,!!sysMatch[1],fields));
+		}
+		return results
 	} else {
 		// It's not a TiddlyWiki so we'll return the entire HTML file as a tiddler
 		return deserializeHtmlFile(text,fields);

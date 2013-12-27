@@ -402,4 +402,27 @@ exports.getAnimationDuration = function() {
 	return parseInt($tw.wiki.getTiddlerText("$:/config/AnimationDuration","400"),10);
 };
 
+/*
+Hash a string to a number
+Derived from http://stackoverflow.com/a/15710692
+*/
+exports.hashString = function(str) {
+	return str.split("").reduce(function(a,b) {
+		a = ((a << 5) - a) + b.charCodeAt(0);
+		return a & a;
+	},0);
+};
+
+/*
+Decode a base64 string
+*/
+exports.base64Decode = function(string64) {
+	if($tw.browser) {
+		// TODO
+		throw "$tw.utils.base64Decode() doesn't work in the browser";
+	} else {
+		return (new Buffer(string64,"base64")).toString();
+	}
+};
+
 })();

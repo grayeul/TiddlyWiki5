@@ -1,7 +1,8 @@
-tags: edition
-modifier: JeremyRuston
+created: 20131129100250644
+modified: 20131129100250644
+tags: howto
 title: TiddlyWiki5 in the Sky for TiddlyWeb
-modified: 201305011456
+type: text/vnd.tiddlywiki
 
 The TiddlyWiki5 in the Sky for TiddlyWeb allows content to be synchronised between TiddlyWiki5 running in the browser and a TiddlyWeb (or TiddlySpace) server. Features include:
 
