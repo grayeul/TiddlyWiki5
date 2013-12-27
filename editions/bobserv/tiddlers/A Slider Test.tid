@@ -1,0 +1,19 @@
+created: 201311170103004
+creator: BobRobison
+modified: 201311170103007
+modifier: BobRobison
+title: A Slider Test
+type: text/vnd.tiddlywiki
+
+\define slider(label,text)
+<$button popup="$:/state/$label$">$label$</$button>
+<$reveal type="nomatch" text="" default="" state="$:/state/$label$" animate="yes">
+$text$
+</$reveal>
+\end
+!This is just a test of some slider macros
+
+Slider:
+
+<<slider "Click me!" "This is a revealing sentence">>
+

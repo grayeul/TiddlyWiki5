@@ -1,0 +1,22 @@
+{
+	"plugins": [
+		"tiddlywiki/codemirror"
+	],
+	"themes": [
+		"tiddlywiki/snowwhite",
+		"tiddlywiki/starlight",
+		"tiddlywiki/centralised",
+		"tiddlywiki/readonly",
+		"grayeul/etch"
+	],
+	"doNotSave": [
+		"$:/StoryList",
+		"$:/HistoryList",
+		"$:/status/IsLoggedIn",
+		"$:/theme",
+		"$:/status/UserName"
+	],
+	"includeWikis": [
+		"../tw5.com"
+	]
+}
