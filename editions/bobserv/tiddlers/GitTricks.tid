@@ -1,0 +1,27 @@
+created: 201311110257002
+creator: BobRobison
+modified: 201311120020004
+modifier: BobRobison
+tags: git
+title: GitTricks
+type: text/vnd.tiddlywiki
+
+Some Basic help for using git
+
+* When working locally, and needing tracking, use:
+** git add File1 File2  // List of files to update/commit//
+** git commit -m "My Message"   // This commits those files added//
+** git push  origin // Should push those up to my local repo//
+
+* When bringing in new stuff from upstream:
+** git fetch upstream master  // This brings in the latest upstream stuff//
+** git merge upstream/master  // This updates your local? stuff and handles merging//
+
+* For a pull-request new feature... create a branch:
+** First make sure everything is up-to-date, then
+** git branch newName
+** git push origin newName
+** git checkout newName   // Switch to new branch//
+
+* Useful git links
+** Nice diagram at: http://gitready.com/beginner/2009/01/21/pushing-and-pulling.html 
