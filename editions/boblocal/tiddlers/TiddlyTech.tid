@@ -1,0 +1,29 @@
+created: 20130830092500000
+creator: BobRobison
+modified: 20131122234824608
+modifier: BobRobison
+title: TiddlyTech
+type: text/vnd.tiddlywiki
+
+Technical Details about TW5/TiddlyWiki
+
+* GitTricks
+* DeveloperDocs
+** Version Info: <<version>>
+* [[TiddlyWiki5 Development Environment]]
+* TiddlerFields
+* TiddlerFilters
+* [[ControlPanel|$:/ControlPanel]]
+* [[ConfigInfo|$:/ConfigInfo]]
+* https://groups.google.com/forum/#!forum/tiddlywiki
+* http://slidr.tiddlyspace.com/
+* [[$:/themes/tiddlywiki/snowwhite/metrics|$:/themes/tiddlywiki/snowwhite/metrics]]
+* [[$:/themes/tiddlywiki/starlight/styles.tid|$:/themes/tiddlywiki/starlight/styles.tid]]
+
+!! Some useful links
+* https://developers.google.com/chrome-developer-tools/docs/elements-styles
+* http://net.tutsplus.com/tutorials/html-css-techniques/the-30-css-selectors-you-must-memorize
+* http://blog.leshill.org/blog/2008/8/24/git-setting-your-upstream-default.html
+* http://adamwhitcroft.com/lab/css-tooltips/
+* http://css-tricks.com/pseudo-element-roundup/
+* https://github.com/Jermolene/TiddlyWiki5/network

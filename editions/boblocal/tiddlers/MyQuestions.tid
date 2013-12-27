@@ -1,0 +1,28 @@
+created: 201311071413000
+creator: BobRobison
+modified: 201311140100008
+modifier: BobRobison
+tags: first_tag 2nd_tag
+title: MyQuestions
+type: text/vnd.tiddlywiki
+
+* Having problems setting story-river to a width based on percentage
+* What are steps required to create a new theme?
+* What are the minimum/key features of a theme?
+* Is there a way to turn on autosave?  Or to get notification when closing a browser page that TW is not saved?
+* New tiddler, can focus start on title and have all selected so typing overwrites?
+* Confused as I lookup docs determining which things apply (only) to TWclassic, TW5 files, TiddlySpace (either flavor), or even how to tell (on tiddlyspace) when you are 'using' classic or new.
+* When have long river, and long sidebar... anyway to move the scrollbar for river to left?  or at least immediately right of river?
+* Where is list of standard macros?
+* What is diff between `$<list xxx>` and `<<list xxx>>`
+** So `$<list xxx>` refers to a Widget, as defined in `core/modules/widgets/list.js`
+** While `<<list xxx>>` seems to refer to a macro that has been previously defined as `/define list ...`
+* What is the signficance of double and triple curly braces?
+* How to add other icons/options to the top of the tiddler?
+* Is there a glossary of different terms with a good explanation:  TopMenu, river, sidebar, field, tag, etc
+* Is it possible to do any math in tiddlers/css?  Like to combine options in [[ThemeTweaks|$:/ControlPanel/ThemeTweaks]].
+* Is there anyway to split out very long lines in a tiddler and have the LF ignored?  Something like the backslash continuation char in unix?
+* Is there a way to have a plugin (for js) or personal tiddlers (for tiddlers) that can 'override' the ones with the same name in the main tiddlywiki?  i.e. If I wanted to use my own PageTemplate or ViewTemplate.
+* I have noticed that the $:/ConfigInfo/ThemeTweaks tiddler magically seems to refer to the right tiddler when I switch themes.  i.e. I get the one that has been defined in my theme.
+
+
