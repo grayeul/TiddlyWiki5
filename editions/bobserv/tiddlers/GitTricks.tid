@@ -1,6 +1,6 @@
-created: 201311110257002
+created: 20131111025700002
 creator: BobRobison
-modified: 201311120020004
+modified: 20131228141602053
 modifier: BobRobison
 tags: git
 title: GitTricks
@@ -14,8 +14,9 @@ Some Basic help for using git
 ** git push  origin // Should push those up to my local repo//
 
 * When bringing in new stuff from upstream:
-** git fetch upstream master  // This brings in the latest upstream stuff//
-** git merge upstream/master  // This updates your local? stuff and handles merging//
+** git fetch upstream master  // This makes local repo aware of latest upstream stuff//
+** git merge upstream/master  // This merges current working copy with info from upstream//
+*** Note that after merging (at some point) you need to 'push' to update your origin with this info.
 
 * For a pull-request new feature... create a branch:
 ** First make sure everything is up-to-date, then

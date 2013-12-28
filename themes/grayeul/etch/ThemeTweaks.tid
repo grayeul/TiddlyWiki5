@@ -4,7 +4,8 @@ caption: ThemeTweaks
 
 You can tweak certain aspects of the etch theme
 
-//Currently, you need to ''save and restart'' TiddlyWiki before these changes take effect. Also take care to preserve any backticks (&#96;) in the settings//
+//If you are using the Node.js server mode, then changes made here will take effect right away.
+If you are using a standalone file, you need to ''save and restart'' TiddlyWiki before these changes take effect. Also take care to preserve any backticks (&#96;) in the settings//
 
 ! Base Colours
 
